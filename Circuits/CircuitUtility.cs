@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Circuits
 {
@@ -39,6 +40,54 @@ namespace Circuits
             sb.Append(c.OutputStream.Wire.Start.Side);
 
             return sb.ToString();
+        }
+
+        public static Circuit BuildCircuit(string inputText)
+        {
+            Regex regexCapture = new Regex(@"(\d+)?(\w)(\d+)?(\w)0#(\d+)?(\w)(\d+)?(\w)");
+            Circuit c = new Circuit();
+
+            List<string> gateList = inputText.Split('\n').ToList<string>();
+            gateList.RemoveAt(0);
+            gateList.RemoveAt(gateList.Count - 1);
+            for (int i = 0; i < gateList.Count; i++)
+            {
+                var gate = c.AddGate(i);
+            }
+
+            for(int i = 0; i < gateList.Count; i++)
+            { 
+                MatchCollection mc = regexCapture.Matches(gateList[i]);
+                if (mc[0].Groups[2].Value == "X")
+                    c.Gates[i].InputL.ConnectTo(c.InputStream);
+                else if (mc[0].Groups[2].Value == "L")
+                    c.Gates[i].InputL.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[1].Value)].OutputL);
+                else if (mc[0].Groups[2].Value == "R")
+                    c.Gates[i].InputL.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[1].Value)].OutputR);
+
+                if (mc[0].Groups[4].Value == "X")
+                    c.Gates[i].InputR.ConnectTo(c.InputStream);
+                else if (mc[0].Groups[4].Value == "L")
+                    c.Gates[i].InputR.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[3].Value)].OutputL);
+                else if (mc[0].Groups[4].Value == "R")
+                    c.Gates[i].InputR.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[3].Value)].OutputR);
+
+                if (mc[0].Groups[6].Value == "X")
+                    c.Gates[i].OutputL.ConnectTo(c.OutputStream);
+                else if (mc[0].Groups[6].Value == "L")
+                    c.Gates[i].OutputL.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[5].Value)].InputL);
+                else if (mc[0].Groups[6].Value == "R")
+                    c.Gates[i].OutputL.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[5].Value)].InputR);
+
+                if (mc[0].Groups[8].Value == "X")
+                    c.Gates[i].OutputR.ConnectTo(c.OutputStream);
+                else if (mc[0].Groups[8].Value == "L")
+                    c.Gates[i].OutputR.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[7].Value)].InputL);
+                else if (mc[0].Groups[8].Value == "R")
+                    c.Gates[i].OutputR.ConnectTo(c.Gates[Int32.Parse(mc[0].Groups[7].Value)].InputR);
+            }
+
+            return c;
         }
     }
 }
