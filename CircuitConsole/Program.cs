@@ -18,10 +18,15 @@ namespace CircuitConsole
             gate0.InputR.ConnectTo(gate0.OutputR);
             gate0.OutputL.ConnectTo(gate1.InputL);
 
-            gate1.InputR.ConnectTo(gate1.OutputR);
-            gate1.OutputL.ConnectTo(c.OutputGate);
+            gate1.InputR.ConnectTo(gate1.OutputL);
+            gate1.OutputR.ConnectTo(c.OutputGate);
 
+
+            System.Console.WriteLine("Input: " + 0);
             int output = c.Evaluate(0);
+
+            System.Console.WriteLine("Output: " + output);
+            System.Console.ReadKey();
         }
     }
 }

@@ -27,6 +27,7 @@ namespace Circuits
         public void ConnectTo(GateOutput output)
         {
             Wire = new Wire(output, this);
+            output.Wire = Wire;
         }
     }
 
@@ -40,6 +41,7 @@ namespace Circuits
         public void ConnectTo(GateInput input)
         {
             Wire = new Wire(this, input);
+            input.Wire = Wire;
         }
 
     }
@@ -72,10 +74,12 @@ namespace Circuits
             OutputR = new GateOutput(this);
         }
 
-        public void Evaluate()
+        public virtual void Evaluate()
         {
             if (Evaluated)
                 return;
+
+            Evaluated = true;
 
             var found = LookupTable[Tuple.Create(InputL.Wire.Value, InputR.Wire.Value)];
 
@@ -89,6 +93,7 @@ namespace Circuits
             }
             else // dunno what this input combination does
             {
+                System.Console.WriteLine("Gate[" + this.Index + "]: unknown input (" + InputL.Wire.Value + ", " + InputR.Wire.Value + ")");
             }
 
             // no
@@ -96,6 +101,19 @@ namespace Circuits
         }
 
         static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { { Tuple.Create(0, 0), Tuple.Create(0, 2) } };
+    }
+
+    public class ExternalGate : Gate
+    {
+        public ExternalGate(Circuit circuit)
+            : base(circuit)
+        {
+        }
+
+        public override void Evaluate()
+        {
+            // got here whee
+        }
     }
 
     public class Wire
@@ -123,7 +141,7 @@ namespace Circuits
 
         public GateOutput InputGate;
         public GateInput OutputGate;
-        public Gate ExternalGate;
+        public ExternalGate ExternalGate;
 
         
         public int Size
@@ -134,14 +152,16 @@ namespace Circuits
         public Circuit()
         {
             Gates = new List<Gate>();
-            ExternalGate = new Gate(this);
+            ExternalGate = new ExternalGate(this);
             InputGate = new GateOutput(ExternalGate);
             OutputGate = new GateInput(ExternalGate);
         }
 
         public Gate AddGate(int index)
         {
-            return new Gate(this);
+            var gate = new Gate(this);
+            Gates.Insert(index, gate);
+            return gate;
         }
 
         public int Evaluate(int input)
