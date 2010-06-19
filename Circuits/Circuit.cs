@@ -5,20 +5,72 @@ using System.Text;
 
 namespace Circuits
 {
+
+    public class GateConnection
+    {
+        public Wire Wire;
+    }
+
+    public class GateInput : GateConnection
+    {
+    }
+
+    public class GateOutput : GateConnection
+    {
+    }
+
     public class Gate
     {
-        public Wire InputL;
-        public Wire InputR;
+        public GateInput InputL;
+        public GateInput InputR;
 
-        public Wire OutputL;
-        public Wire OutputR;
+        public GateOutput OutputL;
+        public GateOutput OutputR;
 
         public int Index
         {
             get { return Circuit.Gates.IndexOf(this); }
         }
 
-        public Circuit Circuit;
+        // property, compare _evaluatedIndex to circuit->CurrentIndex
+        public bool Evaluated;
+
+        public readonly Circuit Circuit;
+
+        public Gate(Circuit circuit)
+        {
+            Circuit = circuit;
+            InputL = new GateInput();
+            InputR = new GateInput();
+
+            OutputL = new GateOutput();
+            OutputR = new GateOutput();
+        }
+
+        public void Evaluate()
+        {
+            if (Evaluated)
+                return;
+
+            var found = LookupTable[Tuple.Create(InputL.Wire.Value, InputR.Wire.Value)];
+
+            if (found != null)
+            {
+                OutputL.Wire.Value = found.Item1;
+                OutputL.Wire.End.Evaluate();
+
+                OutputR.Wire.Value = found.Item2;
+                OutputR.Wire.End.Evaluate();
+            }
+            else // dunno what this input combination does
+            {
+            }
+
+            // no
+            Evaluated = true;
+        }
+
+        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { { Tuple.Create(0, 0), Tuple.Create(0, 2) } };
     }
 
     public class Wire
@@ -26,27 +78,11 @@ namespace Circuits
         public Gate Start;
         public Gate End;
 
-        private byte _currentValue;
-        private byte _nextValue;
-        public byte Value
+        private int _currentValue;
+        public int Value
         {
             get { return _currentValue; }
-            set
-            {
-                if (Start.Index <= End.Index)
-                    _currentValue = value;
-                else
-                {
-                    _currentValue = _nextValue;
-                    _nextValue = value;
-                }
-            }
-        }
-
-        public void Reset()
-        {
-            _currentValue = 0;
-            _nextValue = 0;
+            set { _currentValue = value; }
         }
     }
 
@@ -54,6 +90,10 @@ namespace Circuits
     {
         public List<Gate> Gates;
 
+        public Wire InputWire;
+        public Wire OutputWire;
+
+        
         public int Size
         {
             get { return Gates.Count; }
@@ -62,11 +102,13 @@ namespace Circuits
         public Circuit()
         {
             Gates = new List<Gate>();
+            InputWire = new Wire();
+            OutputWire = new Wire();
         }
 
         public Gate AddGate(int index)
         {
-            return new Gate();
+            return new Gate(this);
         }
 
         private byte[] _input;
