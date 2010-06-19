@@ -5,6 +5,10 @@ using System.Text;
 using System.IO;
 using Circuits;
 
+
+// INPUT STREAM: 01202101210201202
+// KEY STREAM:   11021210112101221
+
 namespace CircuitConsole
 {
     class Program
@@ -19,19 +23,27 @@ namespace CircuitConsole
             }
 
             var file = File.OpenText(args[0]);
-
+            
+            string inputstream;
+            string outputstream;
+            Circuit circuit;
             string function = file.ReadLine();
-            string stream = file.ReadLine();
-
-            var circuit = CircuitUtility.BuildCircuit(file.ReadToEnd());
-
             switch (function)
             {
                 case "FindInput":
-                    FindCircuitInput(circuit, stream);
+                    inputstream = file.ReadLine();
+                    circuit = CircuitUtility.BuildCircuit(file.ReadToEnd());
+                    FindCircuitInput(circuit, inputstream);
                     break;
                 case "FindOutput":
-                    FindCircuitOutput(circuit, stream);
+                    outputstream = file.ReadLine();
+                    circuit = CircuitUtility.BuildCircuit(file.ReadToEnd());
+                    FindCircuitOutput(circuit, outputstream);
+                    break;
+                case "FindCircuit":
+                    inputstream = file.ReadLine();
+                    outputstream = file.ReadLine();
+                    FindCircuit(inputstream.ToStream(), outputstream.ToStream());
                     break;
                 default:
                     System.Console.WriteLine("ERROR: \"{0}\" - Unknown Function", function);
@@ -74,7 +86,7 @@ namespace CircuitConsole
             if (testoutput.SequenceEqual(outputstream.Take(length)))
             {
                 if (testoutput.Length == outputstream.Length) // found a complete match
-                    System.Console.WriteLine("found matching inputstream: {0}", inputstream.FromStream());
+                    System.Console.WriteLine("possible inputstream: {0}", inputstream.FromStream());
                 else
                 {
                     for (int i = 0; i < 3; i++)
@@ -87,6 +99,53 @@ namespace CircuitConsole
             
             // sequence did not match
             return false;
+        }
+
+        static void FindCircuit(int[] inputstream, int[] outputstream)
+        {
+            int nodeCount = 1;
+
+            while(true)
+            {
+                Circuit c = new Circuit();
+
+                for (int i = 0; i < nodeCount; i++)
+                {
+                    Gate g = c.AddGate(i);
+                    g.OutputL.ConnectTo(g.InputL);
+                    g.OutputR.ConnectTo(g.InputR);
+                }
+
+                //TODO: swap wires around here
+
+                //for (int iw = 0; iw < c.Wires.Count; iw++)
+                //{
+                //    GateInput input = c.Wires[iw].End;
+                //    GateOutput output = c.Wires[iw].Start;
+
+                //    input.ConnectTo(c.InputStream);
+                //    output.ConnectTo(c.OutputStream);
+
+                //    //c.Evaluate(inputstream, outputstream);
+
+                //    input.ConnectTo(output);
+                //}
+
+                //for(int ic = 0; ic < nodeCount * 2; ic++)
+                //{
+                //    c.RemoveWires();
+
+                //    c.Gates[ic / 2].Inputs[ic % 2].ConnectTo(c.InputStream);
+                //}
+            }
+        }
+
+        static void CheckCircuit(Circuit c, GateOutput current)
+        {
+            foreach (Gate g in c.Gates)
+            {
+                //GateInput imput = g.OutputL.Wire.
+            }
         }
     }
 }

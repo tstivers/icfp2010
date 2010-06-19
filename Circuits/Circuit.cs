@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace Circuits
 {
 
-    public class GateConnection
+    public abstract class GateConnection
     {
         public enum SideType
         {
@@ -16,7 +16,6 @@ namespace Circuits
             X
         }
 
-        public Wire Wire;
         public readonly Gate Gate;
         public readonly SideType Side;
 
@@ -26,9 +25,15 @@ namespace Circuits
             Side = side;
         }
 
+        public abstract int Value
+        {
+            get;
+            set;
+        }
+
         public void Reset()
         {
-            Wire.Reset();
+            Value = 0;
         }
     }
 
@@ -39,10 +44,32 @@ namespace Circuits
         {
         }
 
-        public void ConnectTo(GateOutput output)
+        private GateOutput _input;
+        public GateOutput Input
         {
-            Wire = new Wire(output, this);
-            output.Wire = Wire;
+            get { return _input; }
+            set { ConnectTo(value); }
+        }
+
+        public void ConnectTo(GateOutput input)
+        {
+            if (input == _input)
+                return;
+
+            var temp = _input;
+            _input = input;
+
+            if (temp != null)
+                temp.Output = null;
+            
+            if(_input != null)
+                input.Output = this;
+        }
+
+        public override int Value
+        {
+            get { Debug.Assert(_input != null); return _input.Value; }
+            set { Debug.Assert(_input != null); _input.Value = value; }
         }
     }
 
@@ -53,10 +80,33 @@ namespace Circuits
         {
         }
 
-        public void ConnectTo(GateInput input)
+        private GateInput _output;
+        public GateInput Output
         {
-            Wire = new Wire(this, input);
-            input.Wire = Wire;
+            get { return _output; }
+            set { ConnectTo(value); }
+        }
+
+        public void ConnectTo(GateInput output)
+        {
+            if (_output == output)
+                return;
+
+            var temp = _output;
+            _output = output;
+
+            if (temp != null)
+                temp.Input = null;
+            
+            if (_output != null)
+                _output.Input = this;
+        }
+
+        private int _value;
+        public override int Value
+        {
+            get { return _value; }
+            set { _value = value; }
         }
     }
 
@@ -67,6 +117,9 @@ namespace Circuits
 
         public readonly GateOutput OutputL;
         public readonly GateOutput OutputR;
+
+        public readonly GateInput[] Inputs = new GateInput[2];
+        public readonly GateOutput[] Outputs = new GateOutput[2];
 
         public GateInput GetInput(GateConnection.SideType side)
         {
@@ -98,6 +151,11 @@ namespace Circuits
 
             OutputL = new GateOutput(this, GateConnection.SideType.L);
             OutputR = new GateOutput(this, GateConnection.SideType.R);
+
+            Inputs[0] = InputL;
+            Inputs[1] = InputR;
+            Outputs[0] = OutputL;
+            Outputs[1] = OutputR;
         }
 
         public override string ToString()
@@ -107,14 +165,14 @@ namespace Circuits
 
         public virtual void Evaluate()
         {
-            var input = Tuple.Create(InputL.Wire.Value, InputR.Wire.Value);
+            var input = Tuple.Create(InputL.Value, InputR.Value);
             Tuple<int, int> output;
 
             if (LookupTable.TryGetValue(input, out output))
             {
                 //Debug.WriteLine(this + ":" + input + " returned " + output);
-                OutputL.Wire.Value = output.Item1;
-                OutputR.Wire.Value = output.Item2;
+                OutputL.Value = output.Item1;
+                OutputR.Value = output.Item2;
             }
             else // dunno what this input combination does
             {
@@ -125,10 +183,8 @@ namespace Circuits
 
         public void Reset()
         {
-            InputL.Reset();
-            InputR.Reset();
-            OutputL.Reset();
-            OutputR.Reset();
+            OutputL.Value = 0;
+            OutputR.Value = 0;
         }
 
         // thank you visio
@@ -167,33 +223,9 @@ namespace Circuits
         }
     }
 
-    public class Wire
-    {
-        public readonly GateOutput Start;
-        public readonly GateInput End;
-
-        private int _currentValue;
-        public int Value
-        {
-            get { return _currentValue; }
-            set { _currentValue = value; }
-        }
-
-        public Wire(GateOutput start, GateInput end)
-        {
-            Start = start;
-            End = end;
-        }
-
-        public void Reset()
-        {
-            _currentValue = 0;
-        }
-    }
-
     public class Circuit
     {
-        public List<Gate> Gates;
+        public List<Gate> Gates = new List<Gate>();        
 
         public GateOutput InputStream;
         public GateInput OutputStream;
@@ -205,8 +237,7 @@ namespace Circuits
         }
 
         public Circuit()
-        {
-            Gates = new List<Gate>();
+        {            
             ExternalGate = new ExternalGate(this);
             InputStream = new GateOutput(ExternalGate, GateConnection.SideType.X);
             OutputStream = new GateInput(ExternalGate, GateConnection.SideType.X);
@@ -221,12 +252,12 @@ namespace Circuits
 
         public int Evaluate(int input)
         {
-            InputStream.Wire.Value = input;
+            InputStream.Value = input;
 
             foreach (Gate g in Gates)
                 g.Evaluate();
            
-            return OutputStream.Wire.Value;
+            return OutputStream.Value;
         }
 
         public string Evaluate(string input)
