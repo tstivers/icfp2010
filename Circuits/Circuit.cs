@@ -81,9 +81,7 @@ namespace Circuits
         public virtual int Index
         {
             get { return Circuit.Gates.IndexOf(this); }
-        }
-
-        public bool Evaluated;
+        }       
 
         public virtual bool IsExternal
         {
@@ -109,23 +107,14 @@ namespace Circuits
 
         public virtual void Evaluate()
         {
-            if (Evaluated)
-                return;
-
-            Evaluated = true;
-            
             var input = Tuple.Create(InputL.Wire.Value, InputR.Wire.Value);
             Tuple<int, int> output;
 
             if (LookupTable.TryGetValue(input, out output))
             {
                 //Debug.WriteLine(this + ":" + input + " returned " + output);
-
                 OutputL.Wire.Value = output.Item1;
                 OutputR.Wire.Value = output.Item2;
-
-                OutputL.Wire.End.Gate.Evaluate();
-                OutputR.Wire.End.Gate.Evaluate();
             }
             else // dunno what this input combination does
             {
@@ -136,7 +125,6 @@ namespace Circuits
 
         public void Reset()
         {
-            Evaluated = false;
             InputL.Reset();
             InputR.Reset();
             OutputL.Reset();
@@ -234,12 +222,10 @@ namespace Circuits
         public int Evaluate(int input)
         {
             InputStream.Wire.Value = input;
-            InputStream.Wire.End.Gate.Evaluate();
 
-            // reset the evaluation flag for the next step
             foreach (Gate g in Gates)
-                g.Evaluated = false;
-
+                g.Evaluate();
+           
             return OutputStream.Wire.Value;
         }
 
