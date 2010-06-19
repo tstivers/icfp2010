@@ -9,14 +9,39 @@ namespace Circuits
     public class GateConnection
     {
         public Wire Wire;
+        public readonly Gate Gate;
+
+        public GateConnection(Gate gate)
+        {
+            Gate = gate;
+        }
     }
 
     public class GateInput : GateConnection
     {
+        public GateInput(Gate gate) 
+            : base(gate)
+        {
+        }
+
+        public void ConnectTo(GateOutput output)
+        {
+            Wire = new Wire(output, this);
+        }
     }
 
     public class GateOutput : GateConnection
     {
+        public GateOutput(Gate gate)
+            : base(gate)
+        {
+        }
+
+        public void ConnectTo(GateInput input)
+        {
+            Wire = new Wire(this, input);
+        }
+
     }
 
     public class Gate
@@ -40,11 +65,11 @@ namespace Circuits
         public Gate(Circuit circuit)
         {
             Circuit = circuit;
-            InputL = new GateInput();
-            InputR = new GateInput();
+            InputL = new GateInput(this);
+            InputR = new GateInput(this);
 
-            OutputL = new GateOutput();
-            OutputR = new GateOutput();
+            OutputL = new GateOutput(this);
+            OutputR = new GateOutput(this);
         }
 
         public void Evaluate()
@@ -57,10 +82,10 @@ namespace Circuits
             if (found != null)
             {
                 OutputL.Wire.Value = found.Item1;
-                OutputL.Wire.End.Evaluate();
+                OutputL.Wire.End.Gate.Evaluate();
 
                 OutputR.Wire.Value = found.Item2;
-                OutputR.Wire.End.Evaluate();
+                OutputR.Wire.End.Gate.Evaluate();
             }
             else // dunno what this input combination does
             {
@@ -75,8 +100,8 @@ namespace Circuits
 
     public class Wire
     {
-        public Gate Start;
-        public Gate End;
+        public readonly GateOutput Start;
+        public readonly GateInput End;
 
         private int _currentValue;
         public int Value
@@ -84,14 +109,21 @@ namespace Circuits
             get { return _currentValue; }
             set { _currentValue = value; }
         }
+
+        public Wire(GateOutput start, GateInput end)
+        {
+            Start = start;
+            End = end;
+        }
     }
 
     public class Circuit
     {
         public List<Gate> Gates;
 
-        public Wire InputWire;
-        public Wire OutputWire;
+        public GateOutput InputGate;
+        public GateInput OutputGate;
+        public Gate ExternalGate;
 
         
         public int Size
@@ -102,13 +134,22 @@ namespace Circuits
         public Circuit()
         {
             Gates = new List<Gate>();
-            InputWire = new Wire();
-            OutputWire = new Wire();
+            ExternalGate = new Gate(this);
+            InputGate = new GateOutput(ExternalGate);
+            OutputGate = new GateInput(ExternalGate);
         }
 
         public Gate AddGate(int index)
         {
             return new Gate(this);
+        }
+
+        public int Evaluate(int input)
+        {
+            InputGate.Wire.Value = input;
+            InputGate.Wire.End.Gate.Evaluate();
+
+            return OutputGate.Wire.Value;
         }
 
         private byte[] _input;
