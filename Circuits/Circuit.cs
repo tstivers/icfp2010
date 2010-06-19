@@ -8,19 +8,28 @@ namespace Circuits
 
     public class GateConnection
     {
+        public enum SideType
+        {
+            L,
+            R,
+            X
+        }
+
         public Wire Wire;
         public readonly Gate Gate;
+        public readonly SideType Side;
 
-        public GateConnection(Gate gate)
+        public GateConnection(Gate gate, SideType side)
         {
             Gate = gate;
+            Side = side;
         }
     }
 
     public class GateInput : GateConnection
     {
-        public GateInput(Gate gate) 
-            : base(gate)
+        public GateInput(Gate gate, SideType side) 
+            : base(gate, side)
         {
         }
 
@@ -33,8 +42,8 @@ namespace Circuits
 
     public class GateOutput : GateConnection
     {
-        public GateOutput(Gate gate)
-            : base(gate)
+        public GateOutput(Gate gate, SideType side)
+            : base(gate, side)
         {
         }
 
@@ -67,11 +76,11 @@ namespace Circuits
         public Gate(Circuit circuit)
         {
             Circuit = circuit;
-            InputL = new GateInput(this);
-            InputR = new GateInput(this);
+            InputL = new GateInput(this, GateConnection.SideType.L);
+            InputR = new GateInput(this, GateConnection.SideType.R);
 
-            OutputL = new GateOutput(this);
-            OutputR = new GateOutput(this);
+            OutputL = new GateOutput(this, GateConnection.SideType.L);
+            OutputR = new GateOutput(this, GateConnection.SideType.R);
         }
 
         public virtual void Evaluate()
@@ -153,8 +162,8 @@ namespace Circuits
         {
             Gates = new List<Gate>();
             ExternalGate = new ExternalGate(this);
-            InputGate = new GateOutput(ExternalGate);
-            OutputGate = new GateInput(ExternalGate);
+            InputGate = new GateOutput(ExternalGate, GateConnection.SideType.X);
+            OutputGate = new GateInput(ExternalGate, GateConnection.SideType.X);
         }
 
         public Gate AddGate(int index)

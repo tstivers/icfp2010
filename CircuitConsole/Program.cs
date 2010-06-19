@@ -21,7 +21,6 @@ namespace CircuitConsole
             gate1.InputR.ConnectTo(gate1.OutputL);
             gate1.OutputR.ConnectTo(c.OutputGate);
 
-
             System.Console.WriteLine("Input: " + 0);
             int output = c.Evaluate(0);
 
