@@ -117,9 +117,9 @@ namespace Circuits
                 System.Console.WriteLine(this + ":" + input + " returned " + output);
 
                 OutputL.Wire.Value = output.Item1;
-                OutputL.Wire.End.Gate.Evaluate();
-
                 OutputR.Wire.Value = output.Item2;
+
+                OutputL.Wire.End.Gate.Evaluate();
                 OutputR.Wire.End.Gate.Evaluate();
             }
             else // dunno what this input combination does

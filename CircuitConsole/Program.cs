@@ -11,10 +11,10 @@ namespace CircuitConsole
         static void Main(string[] args)
         {
             var c = new Circuit();
-            var gate0 = c.AddGate(0);           
-            
-            gate0.InputL.ConnectTo(c.InputStream);
-            gate0.InputR.ConnectTo(gate0.OutputR);
+            var gate0 = c.AddGate(0);
+
+            gate0.InputL.ConnectTo(gate0.OutputR);
+            gate0.InputR.ConnectTo(c.InputStream);
             gate0.OutputL.ConnectTo(c.OutputStream);
 
             System.Console.WriteLine("[Circuit]\n\n" + c.DumpCircuit() + "\n");            
