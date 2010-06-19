@@ -72,13 +72,18 @@ namespace Circuits
             return side == GateConnection.SideType.L ? OutputL : OutputR;
         }
 
-        public int Index
+        public virtual int Index
         {
             get { return Circuit.Gates.IndexOf(this); }
         }
 
         // property, compare _evaluatedIndex to circuit->CurrentIndex
         public bool Evaluated;
+
+        public virtual bool IsExternal
+        {
+            get { return false; }
+        }
 
         public readonly Circuit Circuit;
 
@@ -131,6 +136,16 @@ namespace Circuits
         public override void Evaluate()
         {
             // got here whee
+        }
+
+        public override int Index
+        {
+            get { return -1; }
+        }
+
+        public override bool IsExternal
+        {
+            get { return false; }
         }
     }
 
