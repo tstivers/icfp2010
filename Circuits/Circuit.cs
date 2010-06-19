@@ -148,8 +148,8 @@ namespace Circuits
     {
         public List<Gate> Gates;
 
-        public GateOutput InputGate;
-        public GateInput OutputGate;
+        public GateOutput InputStream;
+        public GateInput OutputStream;
         public ExternalGate ExternalGate;
 
         
@@ -162,8 +162,8 @@ namespace Circuits
         {
             Gates = new List<Gate>();
             ExternalGate = new ExternalGate(this);
-            InputGate = new GateOutput(ExternalGate, GateConnection.SideType.X);
-            OutputGate = new GateInput(ExternalGate, GateConnection.SideType.X);
+            InputStream = new GateOutput(ExternalGate, GateConnection.SideType.X);
+            OutputStream = new GateInput(ExternalGate, GateConnection.SideType.X);
         }
 
         public Gate AddGate(int index)
@@ -175,10 +175,10 @@ namespace Circuits
 
         public int Evaluate(int input)
         {
-            InputGate.Wire.Value = input;
-            InputGate.Wire.End.Gate.Evaluate();
+            InputStream.Wire.Value = input;
+            InputStream.Wire.End.Gate.Evaluate();
 
-            return OutputGate.Wire.Value;
+            return OutputStream.Wire.Value;
         }
 
         private byte[] _input;
