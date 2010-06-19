@@ -8,6 +8,26 @@ namespace Circuits
 {
     public static class CircuitUtility
     {
+        public static int[] ToStream(this string stream)
+        {
+            int[] bleh = new int[stream.Trim().Length];
+
+            int index = 0;
+            foreach (char c in stream.Trim())
+                bleh[index++] = int.Parse("" + c);
+
+            return bleh;
+        }
+
+        public static string FromStream(this int[] stream)
+        {
+            string output = "";
+            foreach(int i in stream)
+                output += i.ToString();
+
+            return output;
+        }
+
         public static string DumpCircuit(this Circuit c)
         {
             StringBuilder sb = new StringBuilder();
@@ -45,11 +65,18 @@ namespace Circuits
         public static Circuit BuildCircuit(string inputText)
         {
             Regex regexCapture = new Regex(@"(\d+)?(\w)(\d+)?(\w)0#(\d+)?(\w)(\d+)?(\w)");
-            Circuit c = new Circuit();
+            
+            var rawList = inputText.Split('\n').ToList<string>();
+            
+            // filter blank lines and comments
+            var gateList = rawList.Where(x => x.Trim().Length > 0 && !x.StartsWith("#")).ToList();
 
-            List<string> gateList = inputText.Split('\n').ToList<string>();
+            // remove inputsteam/outputstream lines
             gateList.RemoveAt(0);
             gateList.RemoveAt(gateList.Count - 1);
+
+            Circuit c = new Circuit();
+
             for (int i = 0; i < gateList.Count; i++)
             {
                 var gate = c.AddGate(i);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace Circuits
 {
@@ -23,6 +24,11 @@ namespace Circuits
         {
             Gate = gate;
             Side = side;
+        }
+
+        public void Reset()
+        {
+            Wire.Reset();
         }
     }
 
@@ -77,7 +83,6 @@ namespace Circuits
             get { return Circuit.Gates.IndexOf(this); }
         }
 
-        // property, compare _evaluatedIndex to circuit->CurrentIndex
         public bool Evaluated;
 
         public virtual bool IsExternal
@@ -114,7 +119,7 @@ namespace Circuits
 
             if (LookupTable.TryGetValue(input, out output))
             {
-                System.Console.WriteLine(this + ":" + input + " returned " + output);
+                //Debug.WriteLine(this + ":" + input + " returned " + output);
 
                 OutputL.Wire.Value = output.Item1;
                 OutputR.Wire.Value = output.Item2;
@@ -124,8 +129,18 @@ namespace Circuits
             }
             else // dunno what this input combination does
             {
-                System.Console.WriteLine(this + ": unknown input " + input);
+                // can't get here
+                Debug.Assert(false, "Unknown Gate Input: " + input);
             }
+        }
+
+        public void Reset()
+        {
+            Evaluated = false;
+            InputL.Reset();
+            InputR.Reset();
+            OutputL.Reset();
+            OutputR.Reset();
         }
 
         // thank you visio
@@ -181,6 +196,11 @@ namespace Circuits
             Start = start;
             End = end;
         }
+
+        public void Reset()
+        {
+            _currentValue = 0;
+        }
     }
 
     public class Circuit
@@ -221,6 +241,29 @@ namespace Circuits
                 g.Evaluated = false;
 
             return OutputStream.Wire.Value;
+        }
+
+        public string Evaluate(string input)
+        {
+            return Evaluate(input.ToStream()).FromStream();
+        }
+
+        public int[] Evaluate(int[] inputstream)
+        {
+            int[] outputstream = new int[inputstream.Length];
+
+            for (int i = 0; i < inputstream.Length; i++)
+                outputstream[i] = Evaluate(inputstream[i]);
+
+            Reset();
+
+            return outputstream;
+        }
+
+        public void Reset()
+        {
+            foreach (Gate g in Gates)
+                g.Reset();
         }
     }
 }
