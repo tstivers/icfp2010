@@ -144,7 +144,7 @@ namespace Circuits
 
         public override bool IsExternal
         {
-            get { return false; }
+            get { return true; }
         }
     }
 
@@ -230,7 +230,7 @@ namespace Circuits
 
         override public string ToString()
         {
-            return "bleh";
+            return CircuitUtility.DumpCircuit(this);
         }
 
         private string arrayToString(byte[] array)

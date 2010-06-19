@@ -24,9 +24,11 @@ namespace CircuitConsole
             System.Console.WriteLine("Input: " + 0);
             int output = c.Evaluate(0);
 
-            System.Console.WriteLine("Output: " + output);
-            System.Console.WriteLine("" + c.InputStream.Wire.End.Gate.Index + c.InputStream.Wire.End.Side + ":");
-            System.Console.WriteLine(":" + c.OutputStream.Wire.Start.Gate.Index + c.OutputStream.Wire.Start.Side);
+            //System.Console.WriteLine("Output: " + output);
+            //System.Console.WriteLine("" + c.InputStream.Wire.End.Gate.Index + c.InputStream.Wire.End.Side + ":");
+            //System.Console.WriteLine(":" + c.OutputStream.Wire.Start.Gate.Index + c.OutputStream.Wire.Start.Side);
+
+            System.Console.WriteLine(c.ToString());
 
             System.Console.ReadKey();
 
