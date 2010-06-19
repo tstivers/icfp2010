@@ -17,7 +17,7 @@ namespace CircuitConsole
             gate0.InputR.ConnectTo(gate0.OutputR);
             gate0.OutputL.ConnectTo(c.OutputStream);
 
-            System.Console.WriteLine("Circuit: " + c.DumpCircuit());            
+            System.Console.WriteLine("[Circuit]\n\n" + c.DumpCircuit() + "\n");            
 
             while (true)
             {

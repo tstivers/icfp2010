@@ -128,7 +128,18 @@ namespace Circuits
             }
         }
 
-        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { { Tuple.Create(0, 0), Tuple.Create(0, 2) } };
+        // thank you visio
+        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { 
+            { Tuple.Create(0, 0), Tuple.Create(0, 2) },
+            { Tuple.Create(1, 0), Tuple.Create(1, 2) },
+            { Tuple.Create(2, 0), Tuple.Create(2, 2) },
+            { Tuple.Create(0, 1), Tuple.Create(2, 2) },
+            { Tuple.Create(1, 1), Tuple.Create(0, 0) },
+            { Tuple.Create(2, 1), Tuple.Create(1, 1) },
+            { Tuple.Create(0, 2), Tuple.Create(1, 2) },
+            { Tuple.Create(1, 2), Tuple.Create(2, 1) },
+            { Tuple.Create(2, 2), Tuple.Create(0, 0) },
+        };
     }
 
     public class ExternalGate : Gate
