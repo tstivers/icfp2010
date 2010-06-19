@@ -34,7 +34,7 @@ namespace Circuits
             sb.Append(c.InputStream.Target.Gate.Index);
             sb.Append(c.InputStream.Target.Side);
             sb.Append(":\n");
-            for(int i = 0; i < c.Gates.Count; i++){
+            for(int i = 0; i < c.Gates.Length; i++){
                 if (!c.Gates[i].InputL.Source.Gate.IsExternal)
                     sb.Append(c.Gates[i].InputL.Source.Gate.Index);
 
@@ -53,7 +53,7 @@ namespace Circuits
                     sb.Append(c.Gates[i].OutputR.Target.Gate.Index);
 
                 sb.Append(c.Gates[i].OutputR.Target.Side);
-                sb.Append((i + 1) == c.Gates.Count ? ":\n" : ",\n");
+                sb.Append((i + 1) == c.Gates.Length ? ":\n" : ",\n");
             }
 
             sb.Append(c.OutputStream.Source.Gate.Index);
@@ -75,7 +75,7 @@ namespace Circuits
             gateList.RemoveAt(0);
             gateList.RemoveAt(gateList.Count - 1);
 
-            Circuit c = new Circuit();
+            Circuit c = new Circuit(gateList.Count);
 
             for (int i = 0; i < gateList.Count; i++)
             {

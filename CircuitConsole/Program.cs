@@ -110,7 +110,7 @@ namespace CircuitConsole
         {            
             while(nodeCount <= maxNodes)
             {
-                Circuit c = new Circuit();
+                Circuit c = new Circuit(nodeCount);
 
                 for (int i = 0; i < nodeCount; i++)                
                     c.AddGate();

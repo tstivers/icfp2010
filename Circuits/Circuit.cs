@@ -146,7 +146,7 @@ namespace Circuits
 
         public virtual int Index
         {
-            get { return Circuit.Gates.IndexOf(this); }
+            get { return _index; }
         }       
 
         public virtual bool IsExternal
@@ -156,7 +156,9 @@ namespace Circuits
 
         public readonly Circuit Circuit;
 
-        public Gate(Circuit circuit)
+        private readonly int _index;
+
+        public Gate(Circuit circuit, int index)
         {
             Circuit = circuit;
             InputL = new GateInput(this, GateConnection.SideType.L);
@@ -168,7 +170,8 @@ namespace Circuits
             Inputs[0] = InputL;
             Inputs[1] = InputR;
             Outputs[0] = OutputL;
-            Outputs[1] = OutputR;           
+            Outputs[1] = OutputR;
+            _index = index;
         }
 
         public override string ToString()
@@ -178,9 +181,9 @@ namespace Circuits
 
         public virtual void Evaluate()
         {
-            
-            OutputL.Value = table[InputL.Value, InputR.Value][0];
-            OutputR.Value = table[InputL.Value, InputR.Value][1];
+            int[] output = table[InputL.Value, InputR.Value];
+            OutputL.Value = output[0];
+            OutputR.Value = output[1];
         }
 
         public void Reset()
@@ -192,26 +195,13 @@ namespace Circuits
         static int[,][] table = new int[3,3][] {
             {new int[]{0,2}, new int[]{2,2}, new int[]{1,2}},
             {new int[]{1,2}, new int[]{0,0}, new int[]{2,1}},
-            {new int[]{2,2}, new int[]{1,1}, new int[]{0,0}}};
-        
-        // thank you visio
-	        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { 
-	            { Tuple.Create(0, 0), Tuple.Create(0, 2) },
-	            { Tuple.Create(1, 0), Tuple.Create(1, 2) },
-	            { Tuple.Create(2, 0), Tuple.Create(2, 2) },
-	            { Tuple.Create(0, 1), Tuple.Create(2, 2) },
-	            { Tuple.Create(1, 1), Tuple.Create(0, 0) },
-	            { Tuple.Create(2, 1), Tuple.Create(1, 1) },
-            { Tuple.Create(0, 2), Tuple.Create(1, 2) },
-	            { Tuple.Create(1, 2), Tuple.Create(2, 1) },
-	            { Tuple.Create(2, 2), Tuple.Create(0, 0) },
-	        };
+            {new int[]{2,2}, new int[]{1,1}, new int[]{0,0}}};       
     }
 
     public class ExternalGate : Gate
     {
         public ExternalGate(Circuit circuit)
-            : base(circuit)
+            : base(circuit, -1)
         {
         }
 
@@ -232,7 +222,7 @@ namespace Circuits
 
     public class Circuit
     {
-        public List<Gate> Gates = new List<Gate>();
+        public Gate[] Gates;
         public List<GateOutput> Outputs = new List<GateOutput>();
         public List<GateInput> Inputs = new List<GateInput>();
 
@@ -242,11 +232,12 @@ namespace Circuits
 
         public int Size
         {
-            get { return Gates.Count; }
+            get { return Gates.Length; }
         }
 
-        public Circuit()
-        {            
+        public Circuit(int gateCount)
+        {
+            Gates = new Gate[gateCount];
             ExternalGate = new ExternalGate(this);
             InputStream = new GateOutput(ExternalGate, GateConnection.SideType.X);
             OutputStream = new GateInput(ExternalGate, GateConnection.SideType.X);
@@ -254,8 +245,8 @@ namespace Circuits
 
         public Gate AddGate()
         {
-            var gate = new Gate(this);
-            Gates.Add(gate);
+            var gate = new Gate(this, Gates.Count(x => x != null));
+            Gates[Gates.Count(x => x != null)] = gate;
             Inputs.Add(gate.InputL);
             Inputs.Add(gate.InputR);
             Outputs.Add(gate.OutputL);
@@ -313,9 +304,9 @@ namespace Circuits
             StringBuilder sb = new StringBuilder();
             sb.Append(InputStream.ToString());
             sb.Append(":\n");
-            foreach (Gate g in Gates.Take(Gates.Count - 1))
+            foreach (Gate g in Gates.Take(Gates.Length - 1))
                 sb.Append(" " + g.ToString() + ",\n");
-            sb.Append(" " + Gates[Gates.Count - 1].ToString() + ":\n");
+            sb.Append(" " + Gates[Gates.Length - 1].ToString() + ":\n");
             sb.Append(OutputStream + "\n");
             return sb.ToString();
         }
