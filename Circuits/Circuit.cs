@@ -97,29 +97,35 @@ namespace Circuits
             OutputR = new GateOutput(this, GateConnection.SideType.R);
         }
 
+        public override string ToString()
+        {
+            return "Gate[" + Index + "]";
+        }
+
         public virtual void Evaluate()
         {
             if (Evaluated)
                 return;
 
             Evaluated = true;
+            
+            var input = Tuple.Create(InputL.Wire.Value, InputR.Wire.Value);
+            Tuple<int, int> output;
 
-            Tuple<int, int> found;            
-            if (LookupTable.TryGetValue(Tuple.Create(InputL.Wire.Value, InputR.Wire.Value), out found))
+            if (LookupTable.TryGetValue(input, out output))
             {
-                OutputL.Wire.Value = found.Item1;
+                System.Console.WriteLine(this + ":" + input + " returned " + output);
+
+                OutputL.Wire.Value = output.Item1;
                 OutputL.Wire.End.Gate.Evaluate();
 
-                OutputR.Wire.Value = found.Item2;
+                OutputR.Wire.Value = output.Item2;
                 OutputR.Wire.End.Gate.Evaluate();
             }
             else // dunno what this input combination does
             {
-                System.Console.WriteLine("Gate[" + this.Index + "]: unknown input (" + InputL.Wire.Value + ", " + InputR.Wire.Value + ")");
+                System.Console.WriteLine(this + ": unknown input " + input);
             }
-
-            // no
-            Evaluated = true;
         }
 
         static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { { Tuple.Create(0, 0), Tuple.Create(0, 2) } };
@@ -134,7 +140,6 @@ namespace Circuits
 
         public override void Evaluate()
         {
-            // got here whee
         }
 
         public override int Index
@@ -175,7 +180,6 @@ namespace Circuits
         public GateInput OutputStream;
         public ExternalGate ExternalGate;
 
-        
         public int Size
         {
             get { return Gates.Count; }
@@ -201,46 +205,11 @@ namespace Circuits
             InputStream.Wire.Value = input;
             InputStream.Wire.End.Gate.Evaluate();
 
+            // reset the evaluation flag for the next step
+            foreach (Gate g in Gates)
+                g.Evaluated = false;
+
             return OutputStream.Wire.Value;
-        }
-
-        private byte[] _input;
-        public string Input
-        {
-            get { return arrayToString(_input); }
-            set { _input = arrayFromString(value); }
-        }
-
-        private byte[] _output;
-        public string Output
-        {
-            get { return arrayToString(_output); }
-            set { _output = arrayFromString(value); }
-        }
-
-        public string Text
-        {
-            get { return this.ToString(); }
-            set { this.ParseCircuit(value); }
-        }
-
-        public void ParseCircuit(string text)
-        {
-        }
-
-        override public string ToString()
-        {
-            return CircuitUtility.DumpCircuit(this);
-        }
-
-        private string arrayToString(byte[] array)
-        {
-            return "bleh";
-        }
-
-        private byte[] arrayFromString(string array)
-        {
-            return new byte[100];
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Circuits
 {
-    class CircuitUtility
+    public static class CircuitUtility
     {
-        public static string DumpCircuit(Circuit c)
+        public static string DumpCircuit(this Circuit c)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(c.InputStream.Wire.End.Gate.Index);

@@ -11,27 +11,42 @@ namespace CircuitConsole
         static void Main(string[] args)
         {
             var c = new Circuit();
-            var gate0 = c.AddGate(0);
-            var gate1 = c.AddGate(1);
+            var gate0 = c.AddGate(0);           
             
             gate0.InputL.ConnectTo(c.InputStream);
             gate0.InputR.ConnectTo(gate0.OutputR);
-            gate0.OutputL.ConnectTo(gate1.InputL);
+            gate0.OutputL.ConnectTo(c.OutputStream);
 
-            gate1.InputR.ConnectTo(gate1.OutputL);
-            gate1.OutputR.ConnectTo(c.OutputStream);
+            System.Console.WriteLine("Circuit: " + c.DumpCircuit());            
 
-            System.Console.WriteLine("Input: " + 0);
-            int output = c.Evaluate(0);
+            while (true)
+            {
+                int input = 0;
+                System.Console.Write("Input: ");
 
-            //System.Console.WriteLine("Output: " + output);
-            //System.Console.WriteLine("" + c.InputStream.Wire.End.Gate.Index + c.InputStream.Wire.End.Side + ":");
-            //System.Console.WriteLine(":" + c.OutputStream.Wire.Start.Gate.Index + c.OutputStream.Wire.Start.Side);
+                var key = System.Console.ReadKey(true);
+                switch (key.Key)
+                {
+                    case ConsoleKey.Escape:
+                        return;
+                        break;
+                    case ConsoleKey.D0:
+                        break;
+                    case ConsoleKey.D1:
+                        input = 1;
+                        break;
+                    case ConsoleKey.D2:
+                        input = 2;
+                        break;
+                    default:
+                        System.Console.WriteLine("<expected 0,1,2,esc>");
+                        continue;
+                }
 
-            System.Console.WriteLine(c.ToString());
-
-            System.Console.ReadKey();
-
+                System.Console.WriteLine("" + input);
+                int output = c.Evaluate(input);
+                System.Console.WriteLine("Output: " + output);               
+            }
         }
     }
 }
