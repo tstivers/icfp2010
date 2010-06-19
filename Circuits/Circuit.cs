@@ -104,9 +104,8 @@ namespace Circuits
 
             Evaluated = true;
 
-            var found = LookupTable[Tuple.Create(InputL.Wire.Value, InputR.Wire.Value)];
-
-            if (found != null)
+            Tuple<int, int> found;            
+            if (LookupTable.TryGetValue(Tuple.Create(InputL.Wire.Value, InputR.Wire.Value), out found))
             {
                 OutputL.Wire.Value = found.Item1;
                 OutputL.Wire.End.Gate.Evaluate();
