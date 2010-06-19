@@ -31,33 +31,33 @@ namespace Circuits
         public static string DumpCircuit(this Circuit c)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(c.InputStream.Output.Gate.Index);
-            sb.Append(c.InputStream.Output.Side);
+            sb.Append(c.InputStream.Target.Gate.Index);
+            sb.Append(c.InputStream.Target.Side);
             sb.Append(":\n");
             for(int i = 0; i < c.Gates.Count; i++){
-                if (!c.Gates[i].InputL.Input.Gate.IsExternal)
-                    sb.Append(c.Gates[i].InputL.Input.Gate.Index);
+                if (!c.Gates[i].InputL.Source.Gate.IsExternal)
+                    sb.Append(c.Gates[i].InputL.Source.Gate.Index);
 
-                sb.Append(c.Gates[i].InputL.Input.Side);
+                sb.Append(c.Gates[i].InputL.Source.Side);
 
-                if (!c.Gates[i].InputR.Input.Gate.IsExternal)
-                    sb.Append(c.Gates[i].InputR.Input.Gate.Index);
+                if (!c.Gates[i].InputR.Source.Gate.IsExternal)
+                    sb.Append(c.Gates[i].InputR.Source.Gate.Index);
 
-                sb.Append(c.Gates[i].InputR.Input.Side);
+                sb.Append(c.Gates[i].InputR.Source.Side);
                 sb.Append("0#");
-                if (!c.Gates[i].OutputL.Output.Gate.IsExternal)
-                    sb.Append(c.Gates[i].OutputL.Output.Gate.Index);
+                if (!c.Gates[i].OutputL.Target.Gate.IsExternal)
+                    sb.Append(c.Gates[i].OutputL.Target.Gate.Index);
 
-                sb.Append(c.Gates[i].OutputL.Output.Side);
-                if (!c.Gates[i].OutputR.Output.Gate.IsExternal)
-                    sb.Append(c.Gates[i].OutputR.Output.Gate.Index);
+                sb.Append(c.Gates[i].OutputL.Target.Side);
+                if (!c.Gates[i].OutputR.Target.Gate.IsExternal)
+                    sb.Append(c.Gates[i].OutputR.Target.Gate.Index);
 
-                sb.Append(c.Gates[i].OutputR.Output.Side);
+                sb.Append(c.Gates[i].OutputR.Target.Side);
                 sb.Append((i + 1) == c.Gates.Count ? ":\n" : ",\n");
             }
 
-            sb.Append(c.OutputStream.Input.Gate.Index);
-            sb.Append(c.OutputStream.Input.Side);
+            sb.Append(c.OutputStream.Source.Gate.Index);
+            sb.Append(c.OutputStream.Source.Side);
 
             return sb.ToString();
         }
@@ -79,7 +79,7 @@ namespace Circuits
 
             for (int i = 0; i < gateList.Count; i++)
             {
-                var gate = c.AddGate(i);
+                c.AddGate();
             }
 
             for(int i = 0; i < gateList.Count; i++)

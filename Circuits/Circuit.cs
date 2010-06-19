@@ -16,6 +16,11 @@ namespace Circuits
             X
         }
 
+        public int Index
+        {
+            get { return Side == SideType.L ? 0 : 1; }
+        }
+
         public readonly Gate Gate;
         public readonly SideType Side;
 
@@ -41,35 +46,39 @@ namespace Circuits
     {
         public GateInput(Gate gate, SideType side) 
             : base(gate, side)
-        {
+        {            
         }
 
-        private GateOutput _input;
-        public GateOutput Input
+        public GateOutput Source;
+       
+        public void ConnectTo(GateOutput source)
         {
-            get { return _input; }
-            set { ConnectTo(value); }
-        }
-
-        public void ConnectTo(GateOutput input)
-        {
-            if (input == _input)
+            if (source == Source)
                 return;
 
-            var temp = _input;
-            _input = input;
+            if (source != null && source.Target != null)
+                source.Target.Source = null;
 
-            if (temp != null)
-                temp.Output = null;
-            
-            if(_input != null)
-                input.Output = this;
+            if (Source != null)
+                Source.Target = null;
+
+            Source = source;
+
+            if (Source != null)
+                Source.Target = this;
         }
 
         public override int Value
         {
-            get { Debug.Assert(_input != null); return _input.Value; }
-            set { Debug.Assert(_input != null); _input.Value = value; }
+            get { Debug.Assert(Source != null); return Source.Value; }
+            set { Debug.Assert(Source != null); Source.Value = value; }
+        }
+
+        public override string ToString()
+        {
+            if (Source == null)
+                return "???";
+            return Source.Gate.IsExternal ? Source.Side.ToString() : Source.Gate.Index.ToString() + Source.Side;
         }
     }
 
@@ -77,29 +86,26 @@ namespace Circuits
     {
         public GateOutput(Gate gate, SideType side)
             : base(gate, side)
-        {
+        {            
         }
+        
+        public GateInput Target;        
 
-        private GateInput _output;
-        public GateInput Output
+        public void ConnectTo(GateInput target)
         {
-            get { return _output; }
-            set { ConnectTo(value); }
-        }
-
-        public void ConnectTo(GateInput output)
-        {
-            if (_output == output)
+            if (Target == target)
                 return;
 
-            var temp = _output;
-            _output = output;
+            if (target != null && target.Source != null)
+                target.Source.Target = null;
 
-            if (temp != null)
-                temp.Input = null;
-            
-            if (_output != null)
-                _output.Input = this;
+            if (Target != null)
+                Target.Source = null;
+
+            Target = target;
+
+            if (target != null)
+                target.Source = this;
         }
 
         private int _value;
@@ -107,6 +113,13 @@ namespace Circuits
         {
             get { return _value; }
             set { _value = value; }
+        }
+
+        public override string ToString()
+        {
+            if (Target == null)
+                return "???";
+            return Target.Gate.IsExternal ? Target.Side.ToString() : Target.Gate.Index.ToString() + Target.Side;
         }
     }
 
@@ -155,30 +168,19 @@ namespace Circuits
             Inputs[0] = InputL;
             Inputs[1] = InputR;
             Outputs[0] = OutputL;
-            Outputs[1] = OutputR;
+            Outputs[1] = OutputR;           
         }
 
         public override string ToString()
         {
-            return "Gate[" + Index + "]";
+            return InputL.ToString() + InputR + "0#" + OutputL + OutputR;
         }
 
         public virtual void Evaluate()
         {
-            var input = Tuple.Create(InputL.Value, InputR.Value);
-            Tuple<int, int> output;
-
-            if (LookupTable.TryGetValue(input, out output))
-            {
-                //Debug.WriteLine(this + ":" + input + " returned " + output);
-                OutputL.Value = output.Item1;
-                OutputR.Value = output.Item2;
-            }
-            else // dunno what this input combination does
-            {
-                // can't get here
-                Debug.Assert(false, "Unknown Gate Input: " + input);
-            }
+            
+            OutputL.Value = table[InputL.Value, InputR.Value][0];
+            OutputR.Value = table[InputL.Value, InputR.Value][1];
         }
 
         public void Reset()
@@ -187,18 +189,23 @@ namespace Circuits
             OutputR.Value = 0;
         }
 
+        static int[,][] table = new int[3,3][] {
+            {new int[]{0,2}, new int[]{2,2}, new int[]{1,2}},
+            {new int[]{1,2}, new int[]{0,0}, new int[]{2,1}},
+            {new int[]{2,2}, new int[]{1,1}, new int[]{0,0}}};
+        
         // thank you visio
-        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { 
-            { Tuple.Create(0, 0), Tuple.Create(0, 2) },
-            { Tuple.Create(1, 0), Tuple.Create(1, 2) },
-            { Tuple.Create(2, 0), Tuple.Create(2, 2) },
-            { Tuple.Create(0, 1), Tuple.Create(2, 2) },
-            { Tuple.Create(1, 1), Tuple.Create(0, 0) },
-            { Tuple.Create(2, 1), Tuple.Create(1, 1) },
+	        static Dictionary<Tuple<int, int>, Tuple<int, int>> LookupTable = new Dictionary<Tuple<int, int>, Tuple<int, int>> { 
+	            { Tuple.Create(0, 0), Tuple.Create(0, 2) },
+	            { Tuple.Create(1, 0), Tuple.Create(1, 2) },
+	            { Tuple.Create(2, 0), Tuple.Create(2, 2) },
+	            { Tuple.Create(0, 1), Tuple.Create(2, 2) },
+	            { Tuple.Create(1, 1), Tuple.Create(0, 0) },
+	            { Tuple.Create(2, 1), Tuple.Create(1, 1) },
             { Tuple.Create(0, 2), Tuple.Create(1, 2) },
-            { Tuple.Create(1, 2), Tuple.Create(2, 1) },
-            { Tuple.Create(2, 2), Tuple.Create(0, 0) },
-        };
+	            { Tuple.Create(1, 2), Tuple.Create(2, 1) },
+	            { Tuple.Create(2, 2), Tuple.Create(0, 0) },
+	        };
     }
 
     public class ExternalGate : Gate
@@ -225,7 +232,9 @@ namespace Circuits
 
     public class Circuit
     {
-        public List<Gate> Gates = new List<Gate>();        
+        public List<Gate> Gates = new List<Gate>();
+        public List<GateOutput> Outputs = new List<GateOutput>();
+        public List<GateInput> Inputs = new List<GateInput>();
 
         public GateOutput InputStream;
         public GateInput OutputStream;
@@ -243,10 +252,14 @@ namespace Circuits
             OutputStream = new GateInput(ExternalGate, GateConnection.SideType.X);
         }
 
-        public Gate AddGate(int index)
+        public Gate AddGate()
         {
             var gate = new Gate(this);
-            Gates.Insert(index, gate);
+            Gates.Add(gate);
+            Inputs.Add(gate.InputL);
+            Inputs.Add(gate.InputR);
+            Outputs.Add(gate.OutputL);
+            Outputs.Add(gate.OutputR);
             return gate;
         }
 
@@ -277,10 +290,34 @@ namespace Circuits
             return outputstream;
         }
 
+        public bool Evaluate(int[] inputstream, int[] outputstream)
+        {
+            Reset();
+            //System.Console.WriteLine("Evaluating:\n\n" + this);
+            //System.Console.WriteLine("Output: " + Evaluate(inputstream).FromStream());
+            for(int i = 0; i < inputstream.Length; i++)
+                if(outputstream[i] != Evaluate(inputstream[i]))
+                    return false;           
+
+            return true;
+        }
+
         public void Reset()
         {
             foreach (Gate g in Gates)
                 g.Reset();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(InputStream.ToString());
+            sb.Append(":\n");
+            foreach (Gate g in Gates.Take(Gates.Count - 1))
+                sb.Append(" " + g.ToString() + ",\n");
+            sb.Append(" " + Gates[Gates.Count - 1].ToString() + ":\n");
+            sb.Append(OutputStream + "\n");
+            return sb.ToString();
         }
     }
 }

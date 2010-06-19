@@ -43,13 +43,16 @@ namespace CircuitConsole
                 case "FindCircuit":
                     inputstream = file.ReadLine();
                     outputstream = file.ReadLine();
-                    FindCircuit(inputstream.ToStream(), outputstream.ToStream());
+                    int nodeCount = Int32.Parse(file.ReadLine());
+                    int maxNodes = Int32.Parse(file.ReadLine());
+                    FindCircuit(inputstream.ToStream(), outputstream.ToStream(), nodeCount, maxNodes);
                     break;
                 default:
                     System.Console.WriteLine("ERROR: \"{0}\" - Unknown Function", function);
                     break;
             }
 
+            System.Console.WriteLine(" ------------ execution ended --------------");
             System.Console.ReadKey(true);
         }
 
@@ -101,50 +104,54 @@ namespace CircuitConsole
             return false;
         }
 
-        static void FindCircuit(int[] inputstream, int[] outputstream)
-        {
-            int nodeCount = 1;
+        static int itercount;
 
-            while(true)
+        static void FindCircuit(int[] inputstream, int[] outputstream, int nodeCount, int maxNodes)
+        {            
+            while(nodeCount <= maxNodes)
             {
                 Circuit c = new Circuit();
 
-                for (int i = 0; i < nodeCount; i++)
-                {
-                    Gate g = c.AddGate(i);
-                    g.OutputL.ConnectTo(g.InputL);
-                    g.OutputR.ConnectTo(g.InputR);
-                }
+                for (int i = 0; i < nodeCount; i++)                
+                    c.AddGate();
 
-                //TODO: swap wires around here
-
-                //for (int iw = 0; iw < c.Wires.Count; iw++)
-                //{
-                //    GateInput input = c.Wires[iw].End;
-                //    GateOutput output = c.Wires[iw].Start;
-
-                //    input.ConnectTo(c.InputStream);
-                //    output.ConnectTo(c.OutputStream);
-
-                //    //c.Evaluate(inputstream, outputstream);
-
-                //    input.ConnectTo(output);
-                //}
-
-                //for(int ic = 0; ic < nodeCount * 2; ic++)
-                //{
-                //    c.RemoveWires();
-
-                //    c.Gates[ic / 2].Inputs[ic % 2].ConnectTo(c.InputStream);
-                //}
+                IterateCircuit(c, 0, inputstream, outputstream);
+                System.Console.WriteLine("nodes: {0}  iterations: {1}", nodeCount, itercount);
+                nodeCount++;
+                itercount = 0;
             }
         }
 
-        static void CheckCircuit(Circuit c, GateOutput current)
+        static void IterateCircuit(Circuit c, int start, int[] inputstream, int[] outputstream)
         {
-            foreach (Gate g in c.Gates)
+            for (int end = 0; end < c.Inputs.Count; end++)
             {
-                //GateInput imput = g.OutputL.Wire.
+                if (c.Inputs[end].Source == null)
+                {
+                    c.Outputs[start].ConnectTo(c.Inputs[end]);
+                    if (start == c.Outputs.Count - 1)
+                        CheckCircuit(c, inputstream, outputstream);
+                    else
+                        IterateCircuit(c, start + 1, inputstream, outputstream);
+                    c.Outputs[start].ConnectTo(null);
+                }
+            }
+        }
+
+        static void CheckCircuit(Circuit c, int[] inputstream, int[] outputstream)
+        {
+            //System.Console.WriteLine("Checking:\n" + c + "\n");
+            foreach (GateOutput o in c.Outputs)
+            {
+                GateInput i = o.Target;
+                c.OutputStream.ConnectTo(o);
+                c.InputStream.ConnectTo(i);                
+                if (c.Evaluate(inputstream, outputstream))
+                {                    
+                    System.Console.WriteLine("MATCHING CIRCUIT FOUND!!!\n{0}", c.DumpCircuit());
+                }
+                i.ConnectTo(o);
+                itercount++;
             }
         }
     }
