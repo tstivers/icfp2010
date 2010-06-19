@@ -52,16 +52,25 @@ namespace Circuits
             Wire = new Wire(this, input);
             input.Wire = Wire;
         }
-
     }
 
     public class Gate
     {
-        public GateInput InputL;
-        public GateInput InputR;
+        public readonly GateInput InputL;
+        public readonly GateInput InputR;
 
-        public GateOutput OutputL;
-        public GateOutput OutputR;
+        public readonly GateOutput OutputL;
+        public readonly GateOutput OutputR;
+
+        public GateInput GetInput(GateConnection.SideType side)
+        {
+            return side == GateConnection.SideType.L ? InputL : InputR;
+        }
+
+        public GateOutput GetOutput(GateConnection.SideType side)
+        {
+            return side == GateConnection.SideType.L ? OutputL : OutputR;
+        }
 
         public int Index
         {
