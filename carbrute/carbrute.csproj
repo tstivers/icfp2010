@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3064ED56-346F-454A-BF55-96E5F30BC7DF}</ProjectGuid>
+    <ProjectGuid>{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CircuitConsole</RootNamespace>
-    <AssemblyName>CircuitConsole</AssemblyName>
+    <RootNamespace>carbrute</RootNamespace>
+    <AssemblyName>carbrute</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -45,16 +45,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Circuits\CircuitSim.csproj">
-      <Project>{6E6E1AF2-0730-4E98-A7B9-C4A4C2192895}</Project>
-      <Name>CircuitSim</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Find1.txt" />
-    <Content Include="FindShift.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -287,7 +287,7 @@ namespace Circuits
             //System.Console.WriteLine("Evaluating:\n\n" + this);
             //System.Console.WriteLine("Output: " + Evaluate(inputstream).FromStream());
             for(int i = 0; i < inputstream.Length; i++)
-                if(outputstream[i] != Evaluate(inputstream[i]))
+                if((outputstream[i] != Evaluate(inputstream[i])) && (outputstream[i] != 4))
                     return false;           
 
             return true;

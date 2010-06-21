@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircuitVis", "CircuitVis\Ci
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CircuitConsole", "CircuitConsole\CircuitConsole.csproj", "{3064ED56-346F-454A-BF55-96E5F30BC7DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "carbrute", "carbrute\carbrute.csproj", "{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,16 @@ Global
 		{3064ED56-346F-454A-BF55-96E5F30BC7DF}.Release|Mixed Platforms.Build.0 = Release|x86
 		{3064ED56-346F-454A-BF55-96E5F30BC7DF}.Release|x86.ActiveCfg = Release|x86
 		{3064ED56-346F-454A-BF55-96E5F30BC7DF}.Release|x86.Build.0 = Release|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Debug|x86.ActiveCfg = Debug|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Debug|x86.Build.0 = Debug|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Release|Any CPU.ActiveCfg = Release|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Release|Mixed Platforms.Build.0 = Release|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Release|x86.ActiveCfg = Release|x86
+		{3B0B1D0E-1B06-4E97-8E4E-648CB75398F7}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
